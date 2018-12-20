@@ -32,6 +32,7 @@
 #include <gazebo/sensors/RaySensor.hh>
 
 #include <limits>
+#include <boost/algorithm/string/replace.hpp>
 
 #include <gazebo/gazebo_config.h>
 
@@ -80,7 +81,6 @@ void GazeboRosSonar::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 
   // default parameters
   namespace_.clear();
-  topic_ = "sonar";
   frame_id_ = "/sonar_link";
 
   // load parameters
@@ -90,8 +90,14 @@ void GazeboRosSonar::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("frameId"))
     frame_id_ = _sdf->GetElement("frameId")->GetValue()->GetAsString();
 
-  if (_sdf->HasElement("topicName"))
-    topic_ = _sdf->GetElement("topicName")->GetValue()->GetAsString();
+  if (!_sdf->HasElement("topicName"))
+  {
+    ROS_INFO_NAMED("sonar", "Sonar plugin missing <topicName>, defaults to /<parent name>/sonar");
+    this->topic_ = _sensor->ParentName() + "/sonar";
+  }
+  else
+    this->topic_ = _sensor->ParentName() + "/" + _sdf->Get<std::string>("topicName");
+  boost::replace_all(this->topic_, "::", "/");
 
   sensor_model_.Load(_sdf);
 
