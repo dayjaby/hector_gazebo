@@ -22,6 +22,8 @@ catkin_package(
     LIBRARIES
 )
 
+catkin_add_env_hooks(hector_gazebo_worlds SHELLS sh DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/env-hooks)
+
 #############
 ## Install ##
 #############
